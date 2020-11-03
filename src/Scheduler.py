@@ -1,14 +1,26 @@
 import Process
+import re
 
 class Scheduler:
 
-    def __init__(self, stringInput):
+    def __init__(self, fileName):
         self.arrProcess = []
         self.arrTransaction = []
-        self.convertString(stringInput)
+        self.convertString(fileName)
 
-    def convertString(self, stringInput):
-        temp = stringInput.replace(';', '')
-        arrString = temp.split(' ')
+    def convertString(self, fileName):
+        file = open("../test/" + fileName, "r")
+        buff = file.read()
+        arrString = buff.split('\n')
         for string in arrString:
-            process = Process.Process()
+            print(string)
+            actionID = string[0]
+            transactionID = re.findall('[0-9]+', string)[0]
+            data = string.split('(')[1]
+            print(actionID)
+            print(transactionID)
+            print(data[0])
+            # process = Process.Process()
+
+if __name__ == "__main__":
+    S = Scheduler("test1.txt")
