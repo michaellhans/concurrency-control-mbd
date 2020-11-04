@@ -4,9 +4,9 @@ class Transaction:
         self.id = id
         self.datalocked = []
 
-    def read(self, data, database, isPending):
+    def read(self, data, database):
         availability = (database[data] == 0) or (database[data] == self.id)
-        if (availability) and (not(isPending)):
+        if (availability):
             self.exclusive_lock(data, database)
             print(f'T{self.id} read {data}!')
             return True
@@ -14,9 +14,9 @@ class Transaction:
             print(f'T{self.id} read {data} PENDING!')
             return False
 
-    def write(self, data, database, isPending):
+    def write(self, data, database):
         availability = (database[data] == 0) or (database[data] == self.id)
-        if (availability) and (not(isPending)):
+        if (availability):
             self.exclusive_lock(data, database)
             print(f'T{self.id} write {data}!')
             return True
@@ -24,7 +24,7 @@ class Transaction:
             print(f'T{self.id} write {data} PENDING!')
             return False
 
-    def commit(self, database, isPending):
+    def commit(self, database):
         if not(isPending):
             print(f'T{self.id} commit!')
             for data in self.datalocked:
