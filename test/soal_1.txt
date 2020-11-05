@@ -1,8 +1,10 @@
-R1(XX)
-W2(XX)
-W2(YY)
-W3(YY)
-W1(YY)
-C1
-C2
-C3
+3
+X Y
+R1(X)
+W2(X)
+W2(Y)
+W3(Y)
+W1(Y)
+C1()
+C2()
+C3()

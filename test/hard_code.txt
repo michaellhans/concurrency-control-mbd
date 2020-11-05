@@ -1,0 +1,39 @@
+arrData = [Data('W'), Data('X'), Data('Y'), Data('Z')]
+
+dataContainer = DataMap(arrData)
+
+T1 = Transaction(1)
+T2 = Transaction(2)
+T3 = Transaction(3)
+T4 = Transaction(4)
+T5 = Transaction(5)
+
+noData = Data('')
+
+# Test Case 1: Pembahasan Soal Ibu Cia
+arrProcess = [
+    Process(T5, 'R', arrData[1], dataContainer),
+    Process(T2, 'R', arrData[2], dataContainer),
+    Process(T1, 'R', arrData[2], dataContainer),
+    Process(T3, 'W', arrData[2], dataContainer),
+    Process(T3, 'W', arrData[3], dataContainer),
+    Process(T5, 'R', arrData[3], dataContainer),
+    Process(T2, 'R', arrData[3], dataContainer),
+    Process(T1, 'R', arrData[1], dataContainer),
+    Process(T4, 'R', arrData[0], dataContainer),
+    Process(T3, 'W', arrData[0], dataContainer),
+    Process(T5, 'W', arrData[2], dataContainer),
+    Process(T5, 'W', arrData[3], dataContainer)
+]
+
+# Test Case 2: Soal Latihan Concurrency Control
+arrProcess = [
+    Process(T1, 'R', arrData[1], dataContainer),
+    Process(T2, 'W', arrData[1], dataContainer),
+    Process(T2, 'W', arrData[2], dataContainer),
+    Process(T3, 'W', arrData[2], dataContainer),
+    Process(T1, 'W', arrData[2], dataContainer),
+    Process(T1, 'C', noData, dataContainer),
+    Process(T2, 'C', noData, dataContainer),
+    Process(T3, 'C', noData, dataContainer),
+]
