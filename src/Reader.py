@@ -1,7 +1,7 @@
 import Process
 import re
 
-class Scheduler:
+class Reader:
 
     def __init__(self, fileName):
         self.arrProcess = []
@@ -19,8 +19,7 @@ class Scheduler:
             data = string.split('(')[1]
             print(actionID)
             print(transactionID)
-            print(data[0])
-            # process = Process.Process()
+            print(data[0: len(data)-1])
 
 if __name__ == "__main__":
-    S = Scheduler("test1.txt")
+    S = Scheduler("soal_1.txt")

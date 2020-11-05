@@ -1,0 +1,8 @@
+R1(XX)
+W2(XX)
+W2(YY)
+W3(YY)
+W1(YY)
+C1
+C2
+C3
