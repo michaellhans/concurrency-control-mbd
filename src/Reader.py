@@ -3,7 +3,7 @@ import re
 
 # General setup for transactions and data
 def generalSetup(fileName):
-    file = open("../test/" + fileName, "r")
+    file = open("test/" + fileName, "r")
     buff = file.read()
     arrString = buff.split('\n')
 
@@ -18,6 +18,13 @@ def generalSetup(fileName):
     raw_data = arrString.pop(0).split(' ')
     for item in raw_data:
         arrData.append(Data(item))
+    
+    for x in arrTransaction:
+        print(x)
+    for x in arrData:
+        print(x)
+    for x in arrString:
+        print(x)
     return arrTransaction, arrData, arrString
 
 # Simple Locking (Exclusive Lock Only) Concurrency Control Converter

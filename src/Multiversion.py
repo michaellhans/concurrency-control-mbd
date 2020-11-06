@@ -96,12 +96,12 @@ if (__name__ == '__main__'):
     T, data, process_string = Reader.generalSetup("soal_video.txt")
     dataContainer, arrProcess = Reader.MVCC_Converter(T, data, process_string)
     
-    print("Multiversion Timestamp Ordering Concurrency Protocol dimulai?")
-    print("Initial State")
-    dataContainer.get_all_version()
-    input()
+    # print("Multiversion Timestamp Ordering Concurrency Protocol dimulai?")
+    # print("Initial State")
+    # dataContainer.get_all_version()
+    # input()
 
-    for process in arrProcess:
-        process.execute()
-        dataContainer.get_all_version()
-        input()
+    # for process in arrProcess:
+    #     process.execute()
+    #     dataContainer.get_all_version()
+    #     input()
