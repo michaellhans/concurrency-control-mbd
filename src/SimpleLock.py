@@ -167,14 +167,6 @@ if __name__ == "__main__":
         input()
         process.execute()
 
-if (__name__ == '__main__'):
-    raw_T, raw_data, raw_process = Reader.generalSetup("soal_1.txt")
-    SL_LockManager, SL_Data, SL_Transaction, SL_Process = Reader.SLock_Converter(raw_T, raw_data, raw_process)
-
-    for process in SL_Process:
-        input()
-        process.execute()
-        
     if len(lockManager.deadlocked_transactions) > 0:
         print('Deadlocked Transactions:')
         for deadlock in lockManager.deadlocked_transactions:

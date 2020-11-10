@@ -145,4 +145,4 @@ def MVCC_Converter(arrTransaction, arrProcess, raw_data):
     for p in arrProcess:
         MVCC_Process.append(MVCProcess(p, MVCC_DataMap))
     
-    return MVCC_DataMap, MVCC_Data, MVCC_Transaction, MVCC_Process
+    return MVCC_DataMap, arrData, MVCC_Transaction, MVCC_Process
