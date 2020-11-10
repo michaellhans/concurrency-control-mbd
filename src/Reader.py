@@ -1,5 +1,6 @@
 import Common
 from Multiversion import *
+from OCC import *
 import SimpleLock as SL
 import re
 
@@ -14,7 +15,6 @@ def generalSetup(fileName):
     num_of_transaction = int(arrString.pop(0))
     for i in range(num_of_transaction):
         arrTransaction.append(Common.Transaction(i+1))
-        print("transaction id", arrTransaction[-1].id)
 
     # Setup all needed data for Concurrency Control
     raw_data = arrString.pop(0).split(' ')
@@ -24,13 +24,21 @@ def generalSetup(fileName):
     for s in arrString:
         s = s.replace('(', '')
         s = s.replace(')', '')
-        arrProcess.append(
-            Common.Process(
-                arrTransaction[int(s[1])-1],
-                s[0],
-                s[2]
+        if len(s) > 2:
+            arrProcess.append(
+                Common.Process(
+                    arrTransaction[int(s[1])-1],
+                    s[0],
+                    s[2]
+                )
             )
-        )
+        else:
+            arrProcess.append(
+                Common.Process(
+                    arrTransaction[int(s[1])-1],
+                    s[0]
+                )
+            )
 
     return arrTransaction, arrProcess, raw_data
 
@@ -64,8 +72,69 @@ def SLock_Converter(arrTransaction, arrData, arrString):
     
 
 # Serial Optimistic Concurrency Control Converter
-def OCC_Converter(num_of_transaction, raw_data, arrString):
-    pass
+def OCC_Converter(arrTransaction, arrProcess, raw_data):
+    
+    validationSet = {}
+    for i in range(len(arrProcess)):
+        p = arrProcess[i]
+        if (p.transaction.id not in validationSet and p.action == 'W'):
+            arrProcess = arrProcess[:i] + [Common.Process(p.transaction, 'V')] + arrProcess[i:]
+            validationSet[p.transaction.id] = True
+
+    for i in range(len(arrProcess)-1, -1, -1):
+        p = arrProcess[i]
+        if (p.transaction.id not in validationSet and p.action == 'R'):
+            arrProcess = arrProcess[:i+1] + [Common.Process(p.transaction, 'V')] + arrProcess[i+1:]
+            validationSet[p.transaction.id] = True
+
+    start = {}
+    finish = {}
+    validation = {}
+    writeSet = {}
+    readSet = {}
+    for i in range(len(arrTransaction)):
+        start[i+1] = 0
+        finish[i+1] = 0
+    for T in arrTransaction:
+        writeSet[T.id] = []
+        readSet[T.id] = [] 
+    
+    for i, p in enumerate(arrProcess, start=1):
+        tid = p.transaction.id
+        if p.action == 'V':
+            validation[tid] = i
+        else:
+
+            if (p.action == 'W'):
+                if p.data not in writeSet[tid]:
+                    writeSet[tid].append(p.data)
+            elif (p.action == 'R'):
+                if p.data not in readSet[tid]:
+                    readSet[tid].append(p.data)
+
+        if start[tid] == 0:
+            start[tid] = i
+        finish[tid] = i
+
+    
+    newArrTransaction = []
+    for T in arrTransaction:
+        newArrTransaction.append(
+            OCCTransaction(
+                T, 
+                writeSet[T.id],
+                readSet[T.id],
+                start[T.id], 
+                validation[T.id], 
+                finish[T.id]
+            )
+        )
+    
+    for p in arrProcess:
+        p.transaction = newArrTransaction[p.transaction.id-1]
+
+    return newArrTransaction, arrProcess
+
 
 # Multiversion Timestamp Ordering Concurrency Control Converter
 def MVCC_Converter(arrTransaction, arrProcess, raw_data):
@@ -75,7 +144,6 @@ def MVCC_Converter(arrTransaction, arrProcess, raw_data):
 
     for data in raw_data:
         arrData.append(MVCData(data))
-    print(arrData[0].label)
 
     MVCC_DataMap = DataMap(arrData)
     for p in arrProcess:

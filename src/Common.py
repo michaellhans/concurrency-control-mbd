@@ -19,4 +19,5 @@ class Process:
             self.data = data
     
     def __str__(self):
-        return f'{self.action}{self.transaction.id}({self.data})'
+        data = f'({self.data})' if (self.action == 'R' or self.action == 'W') else ""
+        return f'{self.action}{self.transaction.id}{data}'
