@@ -1,10 +1,11 @@
 # Multiversion Timestamp Ordering Concurrency Control (MVCC)
+from Common import *
 import Reader
 
-class MVTransaction:
+class MVCTransaction(Transaction):
     
-    def __init__(self, id):
-        self.id = id
+    def __init__(self, transaction):
+        super().__init__(transaction.id)
     
     def read(self, data, dataMap):
         return dataMap.read_issue(data, self)
@@ -49,12 +50,12 @@ class DataMap:
                 print(f'Overwrite value of {data_version}')
                 return True
             else:
-                newVersion = MVData(data.label, version = transaction.id, readTS = transaction.id, writeTS = transaction.id)
+                newVersion = MVCData(data.label, version = transaction.id, readTS = transaction.id, writeTS = transaction.id)
                 version_list.append(newVersion)
                 return True
         return False
 
-class MVData:
+class MVCData:
     
     def __init__(self, label, version = 0, readTS = 0, writeTS = 0):
         self.label = label
@@ -66,14 +67,15 @@ class MVData:
         result = f'TS({self.label}{self.version}) = ({self.readTS}, {self.writeTS})'
         return result
 
-class MVProcess:
+class MVCProcess(Process):
     
-    def __init__(self, transaction, action, data, dataMap):
-        self.transaction = transaction
-        self.action = action
-        self.data = data
-        self.dataMap = dataMap 
-    
+    def __init__(self, process, dataMap):
+        super().__init__(process = process)
+        self.dataMap = dataMap
+        self.transaction = MVCTransaction(self.transaction)
+        self.data = MVCData(self.data)
+        print("sssssssssssssssss", self.transaction.id)
+
     def __str__(self):
         output = f'{self.action}{self.transaction.id}({self.data.label})'
         return output

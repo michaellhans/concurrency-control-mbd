@@ -1,10 +1,12 @@
+import Common
 from Multiversion import *
-from SimpleLock import *
+from OCC import *
+import SimpleLock as SL
 import re
 
 # General setup for transactions and data
 def generalSetup(fileName):
-    file = open("../test/" + fileName, "r")
+    file = open("test/" + fileName, "r")
     buff = file.read()
     arrString = buff.split('\n')
 
@@ -12,57 +14,139 @@ def generalSetup(fileName):
     arrTransaction = []
     num_of_transaction = int(arrString.pop(0))
     for i in range(num_of_transaction):
-        arrTransaction.append(Transaction(i+1))
+        arrTransaction.append(Common.Transaction(i+1))
 
     # Setup all needed data for Concurrency Control
-    arrData = []
     raw_data = arrString.pop(0).split(' ')
-    return arrTransaction, raw_data, arrString
+
+    # Setup process
+    arrProcess = []
+    for s in arrString:
+        s = s.replace('(', '')
+        s = s.replace(')', '')
+        if len(s) > 2:
+            arrProcess.append(
+                Common.Process(
+                    arrTransaction[int(s[1])-1],
+                    s[0],
+                    s[2]
+                )
+            )
+        else:
+            arrProcess.append(
+                Common.Process(
+                    arrTransaction[int(s[1])-1],
+                    s[0]
+                )
+            )
+
+    return arrTransaction, arrProcess, raw_data
 
 # Simple Locking (Exclusive Lock Only) Concurrency Control Converter
-def SLock_Converter(raw_transaction, raw_data, raw_string):
-    SL_Data = []
-    for item in raw_data:
-        SL_Data.append(SLData(Data(item)))
-    SL_LockManager = LockManager(SL_Data)
+def SLock_Converter(arrTransaction, arrData, arrString):
+    SL_DataContainer = []
+    arrDataLabel = []
+    for data in arrData:
+        data_label = data.label
+        arrDataLabel.append(data_label)
+        SL_DataContainer.append(SL.SLData(SL.Data(data_label)))
+    SL_LockManager = SL.LockManager(SL_DataContainer)
     
-    SL_Transaction = []
-    for transaction in raw_transaction:
-        SL_Transaction.append(SLTransaction(transaction, SL_LockManager))
+    arrSLTransaction = []
+    for transaction in arrTransaction:
+        arrSLTransaction.append(SL.SLTransaction(transaction, SL_LockManager))
 
-    SL_Process = []
-    for string in raw_string:
+    arrProcess = []
+    for string in arrString:
         transaction_id = int(re.findall('[0-9]+', string)[0])
         action = string[0]
         raw_data = string.split('(')[1]
         dataLabel = raw_data[0: len(raw_data)-1]
-        newProcess = Process(SL_Transaction[transaction_id - 1], action, SLData(Data(dataLabel)), SL_LockManager)
-        SL_Process.append(newProcess)
+        if dataLabel != '':
+            arrProcess.append(SL.Process(arrSLTransaction[transaction_id - 1], action, SL_DataContainer[arrDataLabel.index(dataLabel)], SL_LockManager))
+        else:
+            arrProcess.append(SL.Process(arrSLTransaction[transaction_id - 1], action, '', SL_LockManager))
+
+    return arrProcess
+
     
-    return SL_LockManager, SL_Data, SL_Transaction, SL_Process
 
 # Serial Optimistic Concurrency Control Converter
-def OCC_Converter(raw_transaction, raw_data, raw_string):
-    pass
+def OCC_Converter(arrTransaction, arrProcess, raw_data):
+    
+    validationSet = {}
+    for i in range(len(arrProcess)):
+        p = arrProcess[i]
+        if (p.transaction.id not in validationSet and p.action == 'W'):
+            arrProcess = arrProcess[:i] + [Common.Process(p.transaction, 'V')] + arrProcess[i:]
+            validationSet[p.transaction.id] = True
+
+    for i in range(len(arrProcess)-1, -1, -1):
+        p = arrProcess[i]
+        if (p.transaction.id not in validationSet and p.action == 'R'):
+            arrProcess = arrProcess[:i+1] + [Common.Process(p.transaction, 'V')] + arrProcess[i+1:]
+            validationSet[p.transaction.id] = True
+
+    start = {}
+    finish = {}
+    validation = {}
+    writeSet = {}
+    readSet = {}
+    for i in range(len(arrTransaction)):
+        start[i+1] = 0
+        finish[i+1] = 0
+    for T in arrTransaction:
+        writeSet[T.id] = []
+        readSet[T.id] = [] 
+    
+    for i, p in enumerate(arrProcess, start=1):
+        tid = p.transaction.id
+        if p.action == 'V':
+            validation[tid] = i
+        else:
+
+            if (p.action == 'W'):
+                if p.data not in writeSet[tid]:
+                    writeSet[tid].append(p.data)
+            elif (p.action == 'R'):
+                if p.data not in readSet[tid]:
+                    readSet[tid].append(p.data)
+
+        if start[tid] == 0:
+            start[tid] = i
+        finish[tid] = i
+
+    
+    newArrTransaction = []
+    for T in arrTransaction:
+        newArrTransaction.append(
+            OCCTransaction(
+                T, 
+                writeSet[T.id],
+                readSet[T.id],
+                start[T.id], 
+                validation[T.id], 
+                finish[T.id]
+            )
+        )
+    
+    for p in arrProcess:
+        p.transaction = newArrTransaction[p.transaction.id-1]
+
+    return newArrTransaction, arrProcess
+
 
 # Multiversion Timestamp Ordering Concurrency Control Converter
-def MVCC_Converter(raw_transaction, raw_data, raw_string):
-    MVCC_Transaction = []
-    for transaction in raw_transaction:
-        MVCC_Transaction.append(MVTransaction(transaction.id))
-    
-    MVCC_Data = []
-    for data in raw_data:
-        MVCC_Data.append(MVData(data))
-    MVCC_DataMap = DataMap(MVCC_Data)
+def MVCC_Converter(arrTransaction, arrProcess, raw_data):
 
+    arrData = []
     MVCC_Process = []
-    for string in raw_string:
-        transaction_id = int(re.findall('[0-9]+', string)[0])
-        action = string[0]
-        raw_data = string.split('(')[1]
-        dataLabel = raw_data[0: len(raw_data)-1]
-        newProcess = MVProcess(MVCC_Transaction[transaction_id - 1], action, MVData(dataLabel), MVCC_DataMap)
-        MVCC_Process.append(newProcess)
+
+    for data in raw_data:
+        arrData.append(MVCData(data))
+
+    MVCC_DataMap = DataMap(arrData)
+    for p in arrProcess:
+        MVCC_Process.append(MVCProcess(p, MVCC_DataMap))
     
     return MVCC_DataMap, MVCC_Data, MVCC_Transaction, MVCC_Process
