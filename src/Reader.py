@@ -6,7 +6,7 @@ import re
 
 # General setup for transactions and data
 def generalSetup(fileName):
-    file = open("../test/" + fileName, "r")
+    file = open("test/" + fileName, "r")
     buff = file.read()
     arrString = buff.split('\n')
 
@@ -145,4 +145,4 @@ def MVCC_Converter(arrTransaction, arrProcess, raw_data):
     for p in arrProcess:
         MVCC_Process.append(MVCProcess(p, MVCC_DataMap))
     
-    return MVCC_DataMap, MVCC_Process
+    return MVCC_DataMap, MVCC_Process 
