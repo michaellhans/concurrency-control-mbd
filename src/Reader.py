@@ -6,7 +6,7 @@ import re
 
 # General setup for transactions and data
 def generalSetup(fileName):
-    file = open("test/" + fileName, "r")
+    file = open("../test/" + fileName, "r")
     buff = file.read()
     arrString = buff.split('\n')
 
@@ -47,7 +47,7 @@ def SLock_Converter(arrTransaction, arrData, arrString):
     SL_DataContainer = []
     arrDataLabel = []
     for data in arrData:
-        data_label = data.label
+        data_label = data.data
         arrDataLabel.append(data_label)
         SL_DataContainer.append(SL.SLData(SL.Data(data_label)))
     SL_LockManager = SL.LockManager(SL_DataContainer)
@@ -57,17 +57,13 @@ def SLock_Converter(arrTransaction, arrData, arrString):
         arrSLTransaction.append(SL.SLTransaction(transaction, SL_LockManager))
 
     arrProcess = []
-    for string in arrString:
-        transaction_id = int(re.findall('[0-9]+', string)[0])
-        action = string[0]
-        raw_data = string.split('(')[1]
-        dataLabel = raw_data[0: len(raw_data)-1]
-        if dataLabel != '':
-            arrProcess.append(SL.Process(arrSLTransaction[transaction_id - 1], action, SL_DataContainer[arrDataLabel.index(dataLabel)], SL_LockManager))
-        else:
-            arrProcess.append(SL.Process(arrSLTransaction[transaction_id - 1], action, '', SL_LockManager))
+    for proc in arrData:
+        transaction_id = proc.transaction.id
+        action = proc.action
+        dataLabel = proc.data
+        arrProcess.append(SL.Process(arrSLTransaction[transaction_id - 1], action, SL_DataContainer[arrDataLabel.index(dataLabel)], SL_LockManager))
 
-    return arrProcess
+    return arrProcess, SL_LockManager
 
     
 
