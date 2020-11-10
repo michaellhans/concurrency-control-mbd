@@ -1,7 +1,7 @@
 # Multiversion Timestamp Ordering Concurrency Control (MVCC)
 import Reader
 
-class Transaction:
+class MVTransaction:
     
     def __init__(self, id):
         self.id = id
@@ -49,12 +49,12 @@ class DataMap:
                 print(f'Overwrite value of {data_version}')
                 return True
             else:
-                newVersion = Data(data.label, version = transaction.id, readTS = transaction.id, writeTS = transaction.id)
+                newVersion = MVData(data.label, version = transaction.id, readTS = transaction.id, writeTS = transaction.id)
                 version_list.append(newVersion)
                 return True
         return False
 
-class Data:
+class MVData:
     
     def __init__(self, label, version = 0, readTS = 0, writeTS = 0):
         self.label = label
@@ -66,7 +66,7 @@ class Data:
         result = f'TS({self.label}{self.version}) = ({self.readTS}, {self.writeTS})'
         return result
 
-class Process:
+class MVProcess:
     
     def __init__(self, transaction, action, data, dataMap):
         self.transaction = transaction
@@ -93,15 +93,15 @@ class Process:
 
 
 if (__name__ == '__main__'):
-    T, data, process_string = Reader.generalSetup("soal_video.txt")
-    dataContainer, arrProcess = Reader.MVCC_Converter(T, data, process_string)
+    raw_T, raw_data, raw_process = Reader.generalSetup("soal_video.txt")
+    MVCC_DataMap, MVCC_Data, MVCC_Transaction, MVCC_Process = Reader.MVCC_Converter(raw_T, raw_data, raw_process)
     
     print("Multiversion Timestamp Ordering Concurrency Protocol dimulai?")
     print("Initial State")
-    dataContainer.get_all_version()
+    MVCC_DataMap.get_all_version()
     input()
 
-    for process in arrProcess:
+    for process in MVCC_Process:
         process.execute()
-        dataContainer.get_all_version()
+        MVCC_DataMap.get_all_version()
         input()

@@ -1,4 +1,5 @@
 import copy
+import Reader
 
 class Transaction:
     
@@ -126,26 +127,26 @@ class LockManager:
         print('success 2', success)
         return success
 
-sldata = [
-    SLData(Data('X')),
-    SLData(Data('Y')),
-]
-lockManager = LockManager(sldata)
-T1 = SLTransaction(Transaction(1), lockManager)
-T2 = SLTransaction(Transaction(2), lockManager)
-T3 = SLTransaction(Transaction(3), lockManager)
+if (__name__ == '__main__'):
+    raw_T, raw_data, raw_process = Reader.generalSetup("soal_1.txt")
+    SL_LockManager, SL_Data, SL_Transaction, SL_Process = Reader.SLock_Converter(raw_T, raw_data, raw_process)
 
-arrProcess = []
-arrProcess.append(Process(T1, 'R', sldata[0], lockManager))
-arrProcess.append(Process(T2, 'W', sldata[0], lockManager))
-arrProcess.append(Process(T2, 'W', sldata[1], lockManager))
-arrProcess.append(Process(T3, 'W', sldata[1], lockManager))
-arrProcess.append(Process(T1, 'W', sldata[0], lockManager))
-arrProcess.append(Process(T1, 'C', '', lockManager))
-arrProcess.append(Process(T2, 'C', '', lockManager))
-arrProcess.append(Process(T3, 'C', '', lockManager))
+    # lockManager = LockManager(sldata)
+    # T1 = SLTransaction(Transaction(1), lockManager)
+    # T2 = SLTransaction(Transaction(2), lockManager)
+    # T3 = SLTransaction(Transaction(3), lockManager)
+
+    # arrProcess = []
+    # arrProcess.append(Process(T1, 'R', sldata[0], lockManager))
+    # arrProcess.append(Process(T2, 'W', sldata[0], lockManager))
+    # arrProcess.append(Process(T2, 'W', sldata[1], lockManager))
+    # arrProcess.append(Process(T3, 'W', sldata[1], lockManager))
+    # arrProcess.append(Process(T1, 'W', sldata[0], lockManager))
+    # arrProcess.append(Process(T1, 'C', '', lockManager))
+    # arrProcess.append(Process(T2, 'C', '', lockManager))
+    # arrProcess.append(Process(T3, 'C', '', lockManager))
 
 
-for process in arrProcess:
-    input()
-    process.execute()
+    for process in SL_Process:
+        input()
+        process.execute()
