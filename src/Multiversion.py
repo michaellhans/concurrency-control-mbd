@@ -74,7 +74,6 @@ class MVCProcess(Process):
         self.dataMap = dataMap
         self.transaction = MVCTransaction(self.transaction)
         self.data = MVCData(self.data)
-        print("sssssssssssssssss", self.transaction.id)
 
     def __str__(self):
         output = f'{self.action}{self.transaction.id}({self.data.label})'

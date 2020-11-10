@@ -6,7 +6,7 @@ import re
 
 # General setup for transactions and data
 def generalSetup(fileName):
-    file = open("test/" + fileName, "r")
+    file = open("../test/" + fileName, "r")
     buff = file.read()
     arrString = buff.split('\n')
 
