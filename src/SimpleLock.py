@@ -161,7 +161,7 @@ class LockManager:
 
 if __name__ == "__main__":
     T, data, process_string = Reader.generalSetup("soal_2.txt")
-    arrProcess = Reader.SLock_Converter(T, data, process_string)
+    arrProcess, lockManager = Reader.SLock_Converter(T, data, process_string)
 
     for process in arrProcess:
         input()
