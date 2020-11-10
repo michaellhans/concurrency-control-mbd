@@ -6,7 +6,7 @@ class MVCTransaction(Transaction):
     
     def __init__(self, transaction):
         super().__init__(transaction.id)
-    
+
     def read(self, data, dataMap):
         return dataMap.read_issue(data, self)
 
@@ -74,7 +74,6 @@ class MVCProcess(Process):
         self.dataMap = dataMap
         self.transaction = MVCTransaction(self.transaction)
         self.data = MVCData(self.data)
-        print("sssssssssssssssss", self.transaction.id)
 
     def __str__(self):
         output = f'{self.action}{self.transaction.id}({self.data.label})'
@@ -93,10 +92,12 @@ class MVCProcess(Process):
         if (not(success)):
             print(f'Abort T{self.transaction.id}')
 
+        return success
 
-if (__name__ == '__main__'):
-    T, arrProcess, raw_data = Reader.generalSetup("soal_video.txt")
+def execute_MV(fileName):
+    T, arrProcess, raw_data = Reader.generalSetup(fileName)
     dataContainer, arrProcess = Reader.MVCC_Converter(T, arrProcess, raw_data)
+    txn_request = []
     
     print("Multiversion Timestamp Ordering Concurrency Protocol dimulai?")
     print("Initial State")
@@ -104,6 +105,16 @@ if (__name__ == '__main__'):
     input()
 
     for process in arrProcess:
-        process.execute()
-        dataContainer.get_all_version()
-        input()
+        if (process.transaction in txn_request):
+            print(f'{process}: {process.transaction} is aborted\n')
+            continue
+        else:
+            success = process.execute()
+            if (not(success)):
+                txn_request.append(process.transaction)
+
+            dataContainer.get_all_version()
+            input()
+
+if (__name__ == '__main__'):
+    execute_MV("soal_video.txt")

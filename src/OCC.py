@@ -14,8 +14,8 @@ class OCCTransaction(Transaction):
     def __str__(self):
         return (f'T{self.id}' + f'\nstart {self.startTs}' + f'\nvalidation {self.validationTs}' + f'\nfinish {self.finishTs}')
 
-if (__name__ == '__main__'):
-    arrTransaction, arrProcess, raw_data = Reader.generalSetup("soal_4.txt")
+def execute_OCC(fileName):
+    arrTransaction, arrProcess, raw_data = Reader.generalSetup(fileName)
     arrTransaction, arrProcess = Reader.OCC_Converter(arrTransaction, arrProcess, raw_data)
 
     for i in range(len(arrTransaction)):
@@ -31,16 +31,12 @@ if (__name__ == '__main__'):
             Tvalid = rule1 or rule2
 
             print(f'finishTs(T{Tc.id}) < startTs(T{T.id}):', rule1)
-            print(f'startTs(T{T.id}) < finishTs({Tc.id}) < validationTs({T.id}):', rule2)
+            print(f'startTs(T{T.id}) < finishTs(T{Tc.id}) < validationTs(T{T.id}):', rule2)
 
             if not Tvalid:
                 break
             
             print()
-            # if not (Tc.finishTs < T.startTs):
-            #     Tvalid = False
-            # if not Tvalid and ((T.startTs < Tc.finishTs < T.finishTs) and set(Tc.writeSet).isdisjoint(T.readSet)):
-            #     Tvalid = True
 
         if (Tvalid):
             print(f'T{T.id} success')
@@ -49,4 +45,3 @@ if (__name__ == '__main__'):
             print('abort')
         
         print('\n--------------------------------------------------------\n')
-
