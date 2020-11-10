@@ -18,9 +18,17 @@ def execute_OCC(fileName):
     arrTransaction, arrProcess, raw_data = Reader.generalSetup(fileName)
     arrTransaction, arrProcess = Reader.OCC_Converter(arrTransaction, arrProcess, raw_data)
 
-    for i in range(len(arrTransaction)):
-        T = arrTransaction[i]
+    for p in arrProcess:
+        print(p)
 
+    print("\nformat: T = (startTs, validationTs, finishTs)")
+    for T in arrTransaction:
+        print(f'T{T.id} = ({T.startTs}, {T.validationTs}, {T.finishTs})')
+
+    for i in range(len(arrTransaction)):
+        print('\n--------------------------------------------------------\n')
+
+        T = arrTransaction[i]
         print(f'T{T.id}\n')        
         Tvalid = True
         for j in range(i):
@@ -43,5 +51,3 @@ def execute_OCC(fileName):
         else:
             print(f'T{T.id} failed')
             print('abort')
-        
-        print('\n--------------------------------------------------------\n')
