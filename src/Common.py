@@ -5,6 +5,10 @@ class Transaction:
 
     def __str__(self):
         return 'T' + str(self.id)
+    
+    def __eq__(self, transaction):
+        return (self.id == transaction.id)
+            
 
 class Process:
 

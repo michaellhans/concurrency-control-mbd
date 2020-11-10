@@ -19,8 +19,8 @@ class OCCData:
     def __init__(self, label):
         self.label = label
 
-if (__name__ == '__main__'):
-    arrTransaction, arrProcess, raw_data = Reader.generalSetup("soal_4.txt")
+def execute_OCC(fileName):
+    arrTransaction, arrProcess, raw_data = Reader.generalSetup(fileName)
     arrTransaction, arrProcess = Reader.OCC_Converter(arrTransaction, arrProcess, raw_data)
 
     for i in range(len(arrTransaction)-1, -1, -1):
@@ -41,3 +41,6 @@ if (__name__ == '__main__'):
             print(f'T{T.id} success')
         else:
             print(f'T{T.id} failed')
+
+if (__name__ == '__main__'):
+    execute_OCC("soal_4.txt")

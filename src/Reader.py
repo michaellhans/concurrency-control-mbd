@@ -1,5 +1,5 @@
 import Common
-from Multiversion import *
+import Multiversion as MV
 from OCC import *
 import SimpleLock as SL
 import re
@@ -139,10 +139,10 @@ def MVCC_Converter(arrTransaction, arrProcess, raw_data):
     MVCC_Process = []
 
     for data in raw_data:
-        arrData.append(MVCData(data))
+        arrData.append(MV.MVCData(data))
 
-    MVCC_DataMap = DataMap(arrData)
+    MVCC_DataMap = MV.DataMap(arrData)
     for p in arrProcess:
-        MVCC_Process.append(MVCProcess(p, MVCC_DataMap))
+        MVCC_Process.append(MV.MVCProcess(p, MVCC_DataMap))
     
     return MVCC_DataMap, MVCC_Process 

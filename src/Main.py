@@ -1,6 +1,6 @@
-import Multiversion as MV
-import SimpleLock as SL
-import OCC as OCC
+from Multiversion import execute_MV
+from SimpleLock import execute_SL
+from OCC import execute_OCC
 
 if __name__ == "__main__":
     print("Selamat datang pada simulasi Concurrency Control G8-K2!")
@@ -11,11 +11,13 @@ if __name__ == "__main__":
     file_input = input("Ketik nama file yang ingin digunakan sebagai test case (Pastikan ada dalam folder 'test'): ")
 
     if method_input == 1:
-        SL.execute_SL(file_input)
+        execute_SL(file_input)
     elif method_input == 2:
         print("OCC")
+        execute_OCC(file_input)
     else:
         print("Multiversion")
+        execute_MV(file_input)
 
     print("\nTerima kasih telah mencoba program kami!")
     print("Creators:\n1. Michael Hans\n2. Muh. Muslim Al Mujahid\n3. Ananda Yulizar\n4. M. Rizki Nahasrudin\n5. Fatkhan Matsuri")
