@@ -14,30 +14,39 @@ class OCCTransaction(Transaction):
     def __str__(self):
         return (f'T{self.id}' + f'\nstart {self.startTs}' + f'\nvalidation {self.validationTs}' + f'\nfinish {self.finishTs}')
 
-class OCCData:
-
-    def __init__(self, label):
-        self.label = label
-
 if (__name__ == '__main__'):
     arrTransaction, arrProcess, raw_data = Reader.generalSetup("soal_4.txt")
     arrTransaction, arrProcess = Reader.OCC_Converter(arrTransaction, arrProcess, raw_data)
 
-    for i in range(len(arrTransaction)-1, -1, -1):
+    for i in range(len(arrTransaction)):
         T = arrTransaction[i]
-        Tvalid = True
 
+        print(f'T{T.id}\n')        
+        Tvalid = True
         for j in range(i):
             Tc = arrTransaction[j]
-            if not (Tc.finishTs < T.startTs):
-                Tvalid = False
-            if not Tvalid and ((T.startTs < Tc.finishTs < T.finishTs) and set(Tc.writeSet).isdisjoint(T.readSet)):
-                Tvalid = True
-            
-            if (not Tvalid):
+            print(f'T{T.id} -> T{Tc.id}')
+            rule1 = (Tc.finishTs < T.startTs)
+            rule2 = ((T.startTs < Tc.finishTs < T.finishTs) and set(Tc.writeSet).isdisjoint(T.readSet))
+            Tvalid = rule1 or rule2
+
+            print(f'finishTs(T{Tc.id}) < startTs(T{T.id}):', rule1)
+            print(f'startTs(T{T.id}) < finishTs({Tc.id}) < validationTs({T.id}):', rule2)
+
+            if not Tvalid:
                 break
+            
+            print()
+            # if not (Tc.finishTs < T.startTs):
+            #     Tvalid = False
+            # if not Tvalid and ((T.startTs < Tc.finishTs < T.finishTs) and set(Tc.writeSet).isdisjoint(T.readSet)):
+            #     Tvalid = True
 
         if (Tvalid):
             print(f'T{T.id} success')
         else:
             print(f'T{T.id} failed')
+            print('abort')
+        
+        print('\n--------------------------------------------------------\n')
+
