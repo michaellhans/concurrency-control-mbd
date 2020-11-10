@@ -13,15 +13,6 @@ class OCCTransaction(Transaction):
 
     def __str__(self):
         return (f'T{self.id}' + f'\nstart {self.startTs}' + f'\nvalidation {self.validationTs}' + f'\nfinish {self.finishTs}')
-    
-    def read(self, data):
-        pass
-
-    def write(self, data):
-        pass
-
-    def commit(self):
-        pass
 
 class OCCData:
 
