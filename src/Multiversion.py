@@ -95,15 +95,15 @@ class MVCProcess(Process):
 
 
 if (__name__ == '__main__'):
-    raw_T, raw_data, raw_process = Reader.generalSetup("soal_video.txt")
-    MVCC_DataMap, MVCC_Data, MVCC_Transaction, MVCC_Process = Reader.MVCC_Converter(raw_T, raw_data, raw_process)
+    T, arrProcess, raw_data = Reader.generalSetup("soal_video.txt")
+    dataContainer, arrProcess = Reader.MVCC_Converter(T, arrProcess, raw_data)
     
     print("Multiversion Timestamp Ordering Concurrency Protocol dimulai?")
     print("Initial State")
-    MVCC_DataMap.get_all_version()
+    dataContainer.get_all_version()
     input()
 
-    for process in MVCC_Process:
+    for process in arrProcess:
         process.execute()
-        MVCC_DataMap.get_all_version()
+        dataContainer.get_all_version()
         input()
