@@ -8,6 +8,7 @@ class OCCTransaction(Transaction):
         self.writeSet = []
         self.readSet = []
         self.startTs = float('inf')
+        self.finishTs = float('inf')
 
     def write(self, i, data):
         if (self.startTs == float('inf')):
@@ -25,18 +26,24 @@ class OCCTransaction(Transaction):
     
     def commit(self, i, arrTransaction):
         success = True
-        for T in arrTransaction:
-            if (T.startTs >= self.startTs) or not T.is_running():
+        for i in range(self.id-1):
+            T = arrTransaction[i]
+            if (T.id == self.id):
                 continue
-            
-            if (not set(T.writeSet).isdisjoint(self.readSet)):
+            if (not (T.finishTs < self.startTs)):
                 success = False
-                break
+            if ((not success) and set(T.writeSet).isdisjoint(self.readSet)):
+                success = True
             
+            if (not success):
+                break
+        
+        self.finishTs = i
+
         return success
 
     def is_running(self):
-        return self.startTs != float('inf')
+        return (self.startTs != float('inf')) and (self.finishTs == float('inf'))
     
     def printInfo(self):
         running = '"running"' if self.is_running() else '"not running"'
@@ -69,6 +76,10 @@ class OCCProcess(Process):
             success = self.transaction.write(i, self.data)
         else:
             success = self.transaction.commit(i, arrTransaction)
+
+        if (not(success)):
+            print(f'Abort T{self.transaction.id}')
+        
         return success
 
 
@@ -81,8 +92,13 @@ def execute_OCC(fileName):
         if (p.transaction in txn_request):
             print(f'{p}: {p.transaction} is aborted\n')
         else:
-            success = p.execute(i, arrTransaction)
             print(p)
+            print("Transaksi dengan timestamp lebih kecil:\n[ ", end="")
+            for i in range(p.transaction.id-1):
+                print(arrTransaction[i], end=" ")
+            print("]")
+
+            success = p.execute(i, arrTransaction)
             for T in arrTransaction:
                 T.printInfo()
 
