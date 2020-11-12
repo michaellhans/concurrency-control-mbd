@@ -32,31 +32,28 @@ class OCCTransaction(Transaction):
             if (not set(T.writeSet).isdisjoint(self.readSet)):
                 success = False
                 break
-        
-        self.writeSet = []
-        self.readSet = []
-        self.startTs = float('inf')
             
         return success
 
     def is_running(self):
         return self.startTs != float('inf')
     
-    def printWriteReadSet(self):
-        print(f"readSet(T{self.id}): [", end="")
+    def printInfo(self):
+        running = '"running"' if self.is_running() else '"not running"'
+        print(f"T{self.id} = ({running}, [", end="")
         for i, x in enumerate(self.readSet):
             if (i == len(self.readSet)-1):
                 print(x, end="")
             else:
                 print(x, end=",")
-        print("]")
-        print(f"writeSet(T{self.id}): [", end="")
+        print("], ", end="")
+        print(f"[", end="")
         for i, x in enumerate(self.writeSet):
             if (i == len(self.writeSet)-1):
                 print(x, end="")
             else:
                 print(x, end=",")
-        print("]")
+        print("])")
             
 
 class OCCProcess(Process):
@@ -83,9 +80,9 @@ def execute_OCC(fileName):
         success = p.execute(i, arrTransaction)
         print(p)
         for T in arrTransaction:
-            T.printWriteReadSet()
-        if (not(success)):
-            print(f'{p}: T{self.transaction.id} is aborted')
+            T.printInfo()
 
-        print()
+        if (not success):
+            print(f'T{p.transaction.id} abort')
+
         input()

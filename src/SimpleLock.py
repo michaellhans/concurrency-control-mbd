@@ -175,5 +175,3 @@ def execute_SL(filename):
 
     print('Metode dengan Simple Locking telah selesai!') 
 
-if __name__ == "__main__":
-    execute_SL("soal_1.txt")
