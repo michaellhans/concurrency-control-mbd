@@ -161,7 +161,7 @@ class LockManager:
 def execute_SL(filename):
     print('Memulai metode Simple Locking...')
     print('*Tekan enter untuk melanjutkan ke langkah berikutnya')
-    T, data, process_string = Reader.generalSetup("soal_1.txt")
+    T, data, process_string = Reader.generalSetup(filename)
     arrProcess, lockManager = Reader.SLock_Converter(T, data, process_string)
 
     for process in arrProcess:
