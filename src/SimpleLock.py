@@ -33,6 +33,10 @@ class Process:
 
             if (not success):
                 self.lockManager.pending.append(self)
+                # print('Deadlock Detector')
+                # for key, value in self.lockManager.deadlock_detector.items():
+                #     print(key)
+                #     print(value)
                 if (not isinstance(self.SLData, str) and len(self.SLData.lock) > 0):
                     wait_id = self.SLTransaction.transaction.id
                     waitee_id = self.SLData.lock[0]
@@ -40,10 +44,7 @@ class Process:
                     deadlock = self.lockManager.detect_deadlock(wait_id, waitee_id)
 
                     if not deadlock:
-                        if waitee_id in self.lockManager.deadlock_detector:
-                            self.lockManager.deadlock_detector[waitee_id].append(wait_id)
-                        else:
-                            self.lockManager.deadlock_detector[waitee_id] = [wait_id]
+                        self.lockManager.deadlock_detector[waitee_id].append(wait_id)
                     else:
                         if (wait_id > waitee_id):
                             del_id = wait_id
@@ -129,6 +130,8 @@ class LockManager:
         self.deadlocked_transactions = []
 
     def exclusive_lock(self, transaction, data):
+        if (transaction.transaction.id not in self.deadlock_detector):
+            self.deadlock_detector[transaction.transaction.id] = []
         
         if ((len(data.lock) > 0) and (transaction.transaction.id == data.lock[0])):
             return True
@@ -141,16 +144,28 @@ class LockManager:
         if (success):
             data.lock.append(transaction.transaction.id)
             if (transaction.transaction.id != data.lock[0]):
+                self.deadlock_detector[data.lock[0]].append(transaction.transaction.id)
                 success = False
         return success
     
     def detect_deadlock(self, wait_id, waitee_id):
-        deadlock = False
+        wait1 = False
+        wait2 = False
+        # print('detec_deadlock')
+        # print(wait_id)
+        # print(waitee_id)
         if waitee_id in self.deadlock_detector:
+            # print('masuk')
+            # print(waitee_id)
             if wait_id in self.deadlock_detector[waitee_id]:
-                deadlock = True
+                wait1 = True
+        if wait_id in self.deadlock_detector:
+            # print('masuk')
+            # print(waitee_id)
+            if waitee_id in self.deadlock_detector[wait_id]:
+                wait2 = True
 
-        return deadlock
+        return wait1 and wait2
 
     def clear_lock(self, transaction_id):
         for data in self.all_data:
@@ -169,9 +184,11 @@ def execute_SL(filename):
         process.execute()
 
     if len(lockManager.deadlocked_transactions) > 0:
-        print('\nDeadlocked Transactions:')
+        print('\nAborted Transactions:')
         for deadlock in lockManager.deadlocked_transactions:
             print(f'T{deadlock}'.format(deadlock))  
 
     print('Metode dengan Simple Locking telah selesai!') 
 
+if __name__ == "__main__":
+    execute_SL("soal_2.txt")
