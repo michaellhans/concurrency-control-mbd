@@ -3,51 +3,89 @@ import Reader
 
 class OCCTransaction(Transaction):
 
-    def __init__(self, transaction, writeSet, readSet, startTs=0, validationTs=0, finishTs=0):
+    def __init__(self, transaction):
         super().__init__(transaction.id)
-        self.writeSet = writeSet
-        self.readSet = readSet
-        self.startTs = startTs
-        self.validationTs = validationTs
-        self.finishTs = finishTs
+        self.writeSet = []
+        self.readSet = []
+        self.startTs = float('inf')
 
-    def __str__(self):
-        return (f'T{self.id}' + f'\nstart {self.startTs}' + f'\nvalidation {self.validationTs}' + f'\nfinish {self.finishTs}')
+    def write(self, i, data):
+        if (self.startTs == float('inf')):
+            self.startTs = i
+        if (data not in self.writeSet):
+            self.writeSet.append(data)
+        return True
+
+    def read(self, i, data):
+        if (self.startTs == float('inf')):
+            self.startTs = i
+        if (data not in self.readSet):
+            self.readSet.append(data)
+        return True
+    
+    def commit(self, i, arrTransaction):
+        success = True
+        for T in arrTransaction:
+            if (T.startTs >= self.startTs) or not T.is_running():
+                continue
+            
+            if (not set(T.writeSet).isdisjoint(self.readSet)):
+                success = False
+                break
+        
+        self.writeSet = []
+        self.readSet = []
+        self.startTs = float('inf')
+            
+        return success
+
+    def is_running(self):
+        return self.startTs != float('inf')
+    
+    def printWriteReadSet(self):
+        print(f"readSet(T{self.id}): [", end="")
+        for i, x in enumerate(self.readSet):
+            if (i == len(self.readSet)-1):
+                print(x, end="")
+            else:
+                print(x, end=",")
+        print("]")
+        print(f"writeSet(T{self.id}): [", end="")
+        for i, x in enumerate(self.writeSet):
+            if (i == len(self.writeSet)-1):
+                print(x, end="")
+            else:
+                print(x, end=",")
+        print("]")
+            
+
+class OCCProcess(Process):
+
+    def __init__(self, process):
+        super().__init__(process = process)
+    
+    def execute(self, i, arrTransaction):
+        success = True
+        if (self.action == 'R'):
+            success = self.transaction.read(i, self.data)
+        elif (self.action == 'W'):
+            success = self.transaction.write(i, self.data)
+        else:
+            success = self.transaction.commit(i, arrTransaction)
+        return success
+
 
 def execute_OCC(fileName):
     arrTransaction, arrProcess, raw_data = Reader.generalSetup(fileName)
     arrTransaction, arrProcess = Reader.OCC_Converter(arrTransaction, arrProcess, raw_data)
 
-    for p in arrProcess:
+    for i, p in enumerate(arrProcess, start=1):
+        success = p.execute(i, arrTransaction)
         print(p)
+        for T in arrTransaction:
+            T.printWriteReadSet()
+        if (not(success)):
+            print(f'{p}: T{self.transaction.id} is aborted')
 
-    print("\nformat: T = (startTs, validationTs, finishTs)")
-    for T in arrTransaction:
-        print(f'T{T.id} = ({T.startTs}, {T.validationTs}, {T.finishTs})')
-
-    for i in range(len(arrTransaction)):
-        print('\n--------------------------------------------------------\n')
-
-        T = arrTransaction[i]
-        print(f'T{T.id}\n')        
-        Tvalid = True
-        for j in range(i):
-            Tc = arrTransaction[j]
-            print(f'T{T.id} -> T{Tc.id}')
-            rule1 = (Tc.finishTs < T.startTs)
-            rule2 = ((T.startTs < Tc.finishTs < T.finishTs) and set(Tc.writeSet).isdisjoint(T.readSet))
-            Tvalid = rule1 or rule2
-
-            print(f'finishTs(T{Tc.id}) < startTs(T{T.id}):', rule1)
-            print(f'startTs(T{T.id}) < finishTs(T{Tc.id}) < validationTs(T{T.id}):', rule2)
-
-            if not Tvalid:
-                break
-            
-            print()
-
-        if (Tvalid):
-            print(f'T{T.id} success')
-        else:
-            print(f'T{T.id} failed')
-            print('abort')
+        print()
+        input()
