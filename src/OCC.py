@@ -75,14 +75,18 @@ class OCCProcess(Process):
 def execute_OCC(fileName):
     arrTransaction, arrProcess, raw_data = Reader.generalSetup(fileName)
     arrTransaction, arrProcess = Reader.OCC_Converter(arrTransaction, arrProcess, raw_data)
+    txn_request = []
 
     for i, p in enumerate(arrProcess, start=1):
-        success = p.execute(i, arrTransaction)
-        print(p)
-        for T in arrTransaction:
-            T.printInfo()
+        if (p.transaction in txn_request):
+            print(f'{p}: {p.transaction} is aborted\n')
+        else:
+            success = p.execute(i, arrTransaction)
+            print(p)
+            for T in arrTransaction:
+                T.printInfo()
 
-        if (not success):
-            print(f'T{p.transaction.id} abort')
+            if (not success):
+                txn_request.append(p.transaction)
 
-        input()
+            input()
