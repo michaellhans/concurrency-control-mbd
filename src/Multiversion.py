@@ -115,6 +115,3 @@ def execute_MV(fileName):
 
             dataContainer.get_all_version()
             input()
-
-if (__name__ == '__main__'):
-    execute_MV("soal_video.txt")
