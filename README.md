@@ -8,11 +8,11 @@ Dalam tugas besar Manajemen Basis Data kali ini, kami mengimplementasikan protok
 
 ## How to Run Program
 1. Untuk menjalankan program, masukkan command berikut dengan kondisi terminal sudah pada directory ./src
-"""python Main.py"""
-2. Masukkan pilihan mode protocol yang ingin disimulasikan
-3. Masukkan nama file yang berisi kumpulan transaksi yang ingin dijalankan.
-4. Format penulisan pada file text yang berisi kumpulan transaksi adalah sebagai berikut.
-"""
+```python Main.py```
+1. Masukkan pilihan mode protocol yang ingin disimulasikan
+2. Masukkan nama file yang berisi kumpulan transaksi yang ingin dijalankan.
+3. Format penulisan pada file text yang berisi kumpulan transaksi adalah sebagai berikut.
+```
 3               # banyak transaksi yang terlibat
 X Y             # data-data yang dimainkan pada schedule
 R1(X)           # T1 melakukan Read terhadap X
@@ -23,7 +23,7 @@ W1(Y)           # T1 melakukan Write terhadap Y
 C1              # T1 melakukan Commit
 C2              # T2 melakukan Commit
 C3              # T3 melakukan Commit
-"""
+```
 
 ## Built With
 
