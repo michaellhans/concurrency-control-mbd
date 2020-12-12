@@ -21,7 +21,7 @@ class Process:
     
     def execute(self):
         if (self.SLTransaction.transaction.id in self.lockManager.deadlocked_transactions):
-            pass
+            self.lockManager.deadlocked_process.append(self)
         else:
             success = True
             if (self.action == 'R'):
@@ -128,6 +128,7 @@ class LockManager:
         self.pending = []
         self.deadlock_detector = {}
         self.deadlocked_transactions = []
+        self.deadlocked_process = []
 
     def exclusive_lock(self, transaction, data):
         if (transaction.transaction.id not in self.deadlock_detector):
@@ -180,8 +181,22 @@ def execute_SL(filename):
     arrProcess, lockManager = Reader.SLock_Converter(T, data, process_string)
 
     for process in arrProcess:
-        input()
+        # input()
         process.execute()
+
+    lockManager.deadlocked_transactions = []
+
+    newArrProcess = copy.deepcopy(lockManager.deadlocked_process)
+    lockManager.deadlocked_process = []
+
+    while (len(newArrProcess) > 0):
+        print('Executing aborted transactions')
+        for process in newArrProcess:
+            # input()
+            process.execute()
+        lockManager.deadlocked_transactions = []
+        newArrProcess = copy.deepcopy(lockManager.deadlocked_process)
+        lockManager.deadlocked_process = []
 
     if len(lockManager.deadlocked_transactions) > 0:
         print('\nAborted Transactions:')
