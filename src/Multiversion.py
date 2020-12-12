@@ -1,11 +1,13 @@
 # Multiversion Timestamp Ordering Concurrency Control (MVCC)
 from Common import *
 import Reader
+import copy
 
 class MVCTransaction(Transaction):
     
     def __init__(self, transaction):
         super().__init__(transaction.id)
+        self.arrProcess = []
 
     def read(self, data, dataMap):
         return dataMap.read_issue(data, self)
@@ -96,7 +98,7 @@ class MVCProcess(Process):
 
 def execute_MV(fileName):
     T, arrProcess, raw_data = Reader.generalSetup(fileName)
-    dataContainer, arrProcess = Reader.MVCC_Converter(T, arrProcess, raw_data)
+    txn, dataContainer, arrProcess = Reader.MVCC_Converter(T, arrProcess, raw_data)
     txn_request = []
     
     print("Multiversion Timestamp Ordering Concurrency Protocol dimulai?")
@@ -104,6 +106,7 @@ def execute_MV(fileName):
     dataContainer.get_all_version()
     input()
 
+    t = 0
     for process in arrProcess:
         if (process.transaction in txn_request):
             print(f'{process}: {process.transaction} is aborted\n')
@@ -115,3 +118,36 @@ def execute_MV(fileName):
 
             dataContainer.get_all_version()
             input()
+        t += 1
+    
+    arrPending = []
+    arrNew = []
+    for temp in txn_request:
+        arrPending.append(txn[2]);
+
+    print("Execute pending request")
+    while (len(arrPending) > 0):
+        for txn in arrPending:
+            txn.id = t
+            t += 1
+            print(len(txn.arrProcess))
+            for process in txn.arrProcess:
+                process.transaction = txn
+                print(process)
+                if (process.transaction in arrNew):
+                    print(f'{process}: {process.transaction} is aborted\n')
+                    continue
+                else:
+                    success = process.execute()
+                    if (not(success)):
+                        arrNew.append(process.transaction)
+                        break
+                    dataContainer.get_all_version()
+                    input()
+                t += 1
+
+            pops = arrPending.pop()
+
+            if (len(arrNew) > 0):
+                arrPending = copy.deepcopy(arrNew)
+                arrNew = []

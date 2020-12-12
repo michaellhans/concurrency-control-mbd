@@ -88,12 +88,19 @@ def MVCC_Converter(arrTransaction, arrProcess, raw_data):
 
     arrData = []
     MVCC_Process = []
+    MVCC_Transaction = []
+
+    for txn in arrTransaction:
+        MVCC_Transaction.append(MV.MVCTransaction(txn))
 
     for data in raw_data:
         arrData.append(MV.MVCData(data))
 
     MVCC_DataMap = MV.DataMap(arrData)
     for p in arrProcess:
-        MVCC_Process.append(MV.MVCProcess(p, MVCC_DataMap))
+        newP = MV.MVCProcess(p, MVCC_DataMap)
+        MVCC_Process.append(newP)
+        MVCC_Transaction[newP.transaction.id - 1].arrProcess.append(newP)
+        # print(newP.transaction.id - 1, "-->", len(MVCC_Transaction[newP.transaction.id - 1].arrProcess))
     
-    return MVCC_DataMap, MVCC_Process 
+    return MVCC_Transaction, MVCC_DataMap, MVCC_Process 
